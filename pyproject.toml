@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hashword"
+version = "0.1.0"
+description = "A terminal password"
+requires-python = ">=3.11"
+dependencies = [
+    "textual",
+    "cryptography",
+    "argon2-cffi",
+]
+
+[project.scripts]
+hashword = "hashword.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
