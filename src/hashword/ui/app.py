@@ -3,6 +3,7 @@ from textual.binding import Binding
 from textual.containers import Vertical
 from textual.widgets import Button, Footer, Input, Label, Static
 from textual.reactive import reactive
+from hashword.ui.vault import VaultScreen
 
 GREEN = "#00FF00"
 BLACK = "#000000"
@@ -132,8 +133,14 @@ class HashwordApp(App):
         self.query_one("#password", Input).focus()
 
     def action_unlock(self) -> None:
-        self.query_one("#password", Input).value = ""
-        self.query_one("#status", Label).update("Vault is not wired up yet.")
+        password_input = self.query_one("#password", Input)
+        entered_password = password_input.value
+        password_input.value = ""  # Clear the input field after attempting to unlock
+
+        if entered_password == "password":  # Replace with actual password check
+            self.push_screen(VaultScreen())
+        else:
+            self.query_one("#status", Label).update("Incorrect master code. Vault locked.")
 
     def action_toggle_focus_mode(self) -> None:
         self.focus_mode = not self.focus_mode
