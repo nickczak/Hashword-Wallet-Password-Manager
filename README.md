@@ -1,18 +1,12 @@
 <div align="center">
-<pre>
-                                                         
-   ▄▄▄  ▄▄▄                                             
-  █▀██  ██               █▄                           █▄
-    ██  ██               ██                   ▄       ██
-    ██████   ▄▀▀█▄ ▄██▀█ ████▄▀█▄ █▄ ██▀▄███▄ ████▄▄████
-    ██  ██   ▄█▀██ ▀███▄ ██ ██ ██▄██▄██ ██ ██ ██   ██ ██
-  ▀██▀  ▀██▄▄▀█▄███▄▄██▀▄██ ██  ▀██▀██▀▄▀███▀▄█▀  ▄█▀███
-</pre>
+  <img src="hashword_logo.png" alt="Hashword logo" width="400">
 </div>
 
-# Hashword Wallet
+<h4 align="center">An Accessible Password Manager.</h4>
 
-A terminal-based password vault prototype built with Python and Textual.
+---
+### Description
+Hashword is...
 
 ## Run from source
 
