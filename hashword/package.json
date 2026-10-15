@@ -2,14 +2,29 @@
   "name": "hashword",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "bin": {
+    "hashword": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "public/assets/banner.txt"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node --watch --import=tsx src/index.tsx",
+    "build": "node -e \"require('node:fs').rmSync('dist', {recursive: true, force: true})\" && tsc && node -e \"require('node:fs').chmodSync('dist/index.js', 0o755)\"",
+    "prepack": "npm run build",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "ink": "^8.0.0",
     "react": "^19.3.0"
