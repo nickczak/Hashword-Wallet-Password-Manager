@@ -14,14 +14,43 @@ export default function App() {
   const { exit } = useApp();
   const [unlocked, setUnlocked] = React.useState(false);
   const [section, setSection] = React.useState("passwords");
+  const [enteredPassword, setEnteredPassword] = React.useState("");
 
+  const handlePasswordSubmit = () => {
+    // For demonstration purposes, the preview password is "password".
+    setUnlocked(enteredPassword === "password");
+    setEnteredPassword("");
+  };
+
+  /** KEY BINDINGS
+   *  enter - submit password or lock the preview
+   *  q - quit
+   *  p - switch to passwords (only when unlocked)
+   *  w - switch to wallets (only when unlocked)
+   */
   useInput((input, key) => {
-    if (key.return) setUnlocked((current) => !current);
-    if (input.toLowerCase() === "q") exit();
-    if (unlocked && input.toLowerCase() === "p") setSection("passwords");
-    if (unlocked && input.toLowerCase() === "w") setSection("wallets");
+    if (input.toLowerCase() === "q") {
+      exit();
+      return;
+    }
+
+    if (unlocked) {
+      if (key.return) setUnlocked(false);
+      if (input.toLowerCase() === "p") setSection("passwords");
+      if (input.toLowerCase() === "w") setSection("wallets");
+      return;
+    }
+
+    if (key.return) {
+      handlePasswordSubmit();
+    } else if (key.backspace || key.delete) {
+      setEnteredPassword((password) => password.slice(0, -1));
+    } else if (!key.ctrl && !key.meta && input && /^[\x20-\x7e]+$/.test(input)) {
+      setEnteredPassword((password) => password + input);
+    }
   });
 
+  // Calculate layout dimensions based on terminal size
   const padding = columns < 70 ? 2 : 4;
   const contentWidth = Math.max(1, columns - padding * 2);
   const sidebarWidth = Math.min(24, Math.floor(contentWidth / 3));
@@ -33,7 +62,7 @@ export default function App() {
       width={columns}
       height={rows}
       paddingX={padding}
-      paddingY={1}
+      paddingY={0}
     >
       <Box justifyContent="space-between">
         <Text bold color={green}>hashword</Text>
@@ -73,24 +102,25 @@ export default function App() {
           </Box>
         )}
         <Box flexGrow={1} flexBasis={0} flexDirection="column" alignItems="center" justifyContent="center" paddingX={1}>
-        {mainWidth >= 58 && rows >= 24 && (
-          <Box marginBottom={2}>
-            <Text color={green}>{banner}</Text>
-          </Box>
-        )}
-        <Text bold>{unlocked ? section : "welcome to hashword"}</Text>
-        <Text dimColor>wallet & password manager</Text>
+          {mainWidth >= 58 && rows >= 24 && (
+            <Box marginBottom={1.5}>
+              <Text color={green}>{banner}</Text>
+            </Box>
+          )}
+          <Text dimColor>wallet & password manager</Text>
 
-        <Box marginTop={1} marginBottom={1}>
-          <Text>
-            {unlocked
-              ? `Your ${section} will appear here.`
-              : "Keep your passwords and wallets in one place."}
-          </Text>
-        </Box>
-        <Text color={green}>
-          {unlocked ? "> lock vault" : "> open vault preview"}
-        </Text>
+          {!unlocked && (
+            <Box marginTop={2} width={40} borderStyle="single" borderColor="gray" paddingX={1}>
+              <Box width={10} flexShrink={0}><Text color={green}>Password:</Text></Box>
+              <Box width={26} flexShrink={0}>
+                {enteredPassword ? (
+                  <Text color={green}>{"•".repeat(Math.min(enteredPassword.length, 26))}</Text>
+                ) : (
+                  <Text dimColor>Enter password...</Text>
+                )}
+              </Box>
+            </Box>
+          )}
         </Box>
       </Box>
 
