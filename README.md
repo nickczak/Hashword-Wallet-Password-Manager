@@ -11,6 +11,7 @@ Install Node.js 22 or newer, then download and extract this repository.
 
 ```sh
 cd hashword
+npm install
 npm ci
 npm run build
 npm link
@@ -26,6 +27,7 @@ hashword
 ```sh
 git clone <THIS REPO>
 cd hashword
+npm install
 npm ci
 npm run dev
 ```
