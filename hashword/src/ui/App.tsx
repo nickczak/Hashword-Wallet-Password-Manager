@@ -1,6 +1,8 @@
 import React from "react";
 import { readFileSync } from "node:fs";
 import { Box, Text, useApp, useInput, useWindowSize } from "ink";
+import LoginPage from "./LoginPage.js";
+import VaultPage from "./VaultPage.js";
 
 const banner = readFileSync(
   new URL("../../public/assets/banner.txt", import.meta.url),
@@ -23,7 +25,8 @@ export default function App() {
   };
 
   /** KEY BINDINGS
-   *  enter - submit password or lock the preview
+   *  enter - submit password
+   *  esc - lock the vault (only when unlocked)
    *  q - quit
    *  p - switch to passwords (only when unlocked)
    *  w - switch to wallets (only when unlocked)
@@ -35,7 +38,7 @@ export default function App() {
     }
 
     if (unlocked) {
-      if (key.return) setUnlocked(false);
+      if (key.escape) setUnlocked(false);
       if (input.toLowerCase() === "p") setSection("passwords");
       if (input.toLowerCase() === "w") setSection("wallets");
       return;
@@ -53,8 +56,6 @@ export default function App() {
   // Calculate layout dimensions based on terminal size
   const padding = columns < 70 ? 2 : 4;
   const contentWidth = Math.max(1, columns - padding * 2);
-  const sidebarWidth = Math.min(24, Math.floor(contentWidth / 3));
-  const mainWidth = unlocked ? contentWidth - sidebarWidth : contentWidth;
 
   return (
     <Box
@@ -82,52 +83,21 @@ export default function App() {
         ))}
       </Box>
 
-      <Box flexGrow={1}>
-        {unlocked && (
-          <Box width={sidebarWidth} flexShrink={0} flexDirection="column" paddingRight={1} paddingY={1} borderStyle="single" borderColor="gray" borderTop={false} borderBottom={false} borderLeft={false}>
-            <Text bold color={green}>vault info</Text>
-            <Box marginTop={1} flexDirection="column">
-              <Text dimColor>status</Text>
-              <Text color={green}>unlocked</Text>
-            </Box>
-            <Box marginTop={1} flexDirection="column">
-              <Text dimColor>view</Text>
-              <Text>{section}</Text>
-            </Box>
-            <Box marginTop={1} flexDirection="column">
-              <Text dimColor>mode</Text>
-              <Text>preview</Text>
-            </Box>
-            <Box marginTop={1}><Text dimColor>Enter to lock.</Text></Box>
-          </Box>
-        )}
-        <Box flexGrow={1} flexBasis={0} flexDirection="column" alignItems="center" justifyContent="center" paddingX={1}>
-          {mainWidth >= 58 && rows >= 24 && (
-            <Box marginBottom={1.5}>
-              <Text color={green}>{banner}</Text>
-            </Box>
-          )}
-          <Text dimColor>wallet & password manager</Text>
-
-          {!unlocked && (
-            <Box marginTop={2} width={40} borderStyle="single" borderColor="gray" paddingX={1}>
-              <Box width={10} flexShrink={0}><Text color={green}>Password:</Text></Box>
-              <Box width={26} flexShrink={0}>
-                {enteredPassword ? (
-                  <Text color={green}>{"•".repeat(Math.min(enteredPassword.length, 26))}</Text>
-                ) : (
-                  <Text dimColor>Enter password...</Text>
-                )}
-              </Box>
-            </Box>
-          )}
-        </Box>
-      </Box>
+      {unlocked ? (
+        <VaultPage key={section} section={section} />
+      ) : (
+        <LoginPage
+          banner={banner}
+          showBanner={contentWidth >= 58 && rows >= 24}
+          enteredPassword={enteredPassword}
+        />
+      )}
 
       <Text dimColor>{"─".repeat(contentWidth)}</Text>
       <Box gap={3}>
-        {unlocked && <Text dimColor>p passwords / w wallets</Text>}
-        <Text><Text color={green}>enter</Text><Text dimColor>{unlocked ? " lock" : " open preview"}</Text></Text>
+        {unlocked && <Text dimColor>p passwords / w wallets · j/k move · enter open/back</Text>}
+        {!unlocked && <Text><Text color={green}>enter</Text><Text dimColor> submit</Text></Text>}
+        {unlocked && <Text><Text color={green}>esc</Text><Text dimColor> lock</Text></Text>}
         <Text><Text color={green}>q</Text><Text dimColor> quit</Text></Text>
       </Box>
     </Box>
