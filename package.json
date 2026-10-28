@@ -2,6 +2,7 @@
   "name": "hashword-workspace",
   "private": true,
   "scripts": {
+    "showcase": "python3 scripts/showcase-app.py",
     "dev": "npm --prefix hashword run dev",
     "build": "npm --prefix hashword run build",
     "start": "npm --prefix hashword start",
