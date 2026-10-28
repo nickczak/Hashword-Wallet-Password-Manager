@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { Box, Text, useApp, useInput, useWindowSize } from "ink";
 import LoginPage from "./LoginPage.js";
 import VaultPage from "./VaultPage.js";
+import { initialEntries } from "./vaultData.js";
 
 const banner = readFileSync(
   new URL("../../public/assets/banner.txt", import.meta.url),
@@ -10,6 +11,8 @@ const banner = readFileSync(
 ).trimEnd();
 
 const green = "#39FF14";
+// The terminal preview uses the same demo master key for unlocking and revealing.
+const verifyMasterKey = (value: string) => value === "password";
 
 export default function App() {
   const { columns, rows } = useWindowSize();
@@ -17,15 +20,19 @@ export default function App() {
   const [unlocked, setUnlocked] = React.useState(false);
   const [section, setSection] = React.useState("passwords");
   const [enteredPassword, setEnteredPassword] = React.useState("");
+  const [entriesBySection, setEntriesBySection] = React.useState(initialEntries);
+  const [editing, setEditing] = React.useState(false);
+  const [prompting, setPrompting] = React.useState(false);
 
   const handlePasswordSubmit = () => {
     // For demonstration purposes, the preview password is "password".
-    setUnlocked(enteredPassword === "password");
+    setUnlocked(verifyMasterKey(enteredPassword));
     setEnteredPassword("");
   };
 
   /** KEY BINDINGS
    *  enter - submit password
+   *  enter - open entry details (only when unlocked)
    *  esc - return to entries (only when unlocked)
    *  ctrl+l - lock the vault (only when unlocked)
    *  ctrl+q - quit
@@ -39,7 +46,13 @@ export default function App() {
     }
 
     if (unlocked) {
-      if (key.ctrl && input.toLowerCase() === "l") setUnlocked(false);
+      if (key.ctrl && input.toLowerCase() === "l") {
+        setEditing(false);
+        setPrompting(false);
+        setUnlocked(false);
+        return;
+      }
+      if (editing || prompting || key.ctrl || key.meta) return;
       if (input.toLowerCase() === "p") setSection("passwords");
       if (input.toLowerCase() === "w") setSection("wallets");
       return;
@@ -85,7 +98,23 @@ export default function App() {
       </Box>
 
       {unlocked ? (
-        <VaultPage key={section} section={section} />
+        <VaultPage
+          key={section}
+          section={section}
+          entries={entriesBySection[section] ?? []}
+          onEditingChange={setEditing}
+          onPromptChange={setPrompting}
+          verifyMasterKey={verifyMasterKey}
+          onFieldSave={(entryIndex, fieldIndex, value) => {
+            setEntriesBySection((current) => ({
+              ...current,
+              [section]: (current[section] ?? []).map((entry, index) => index === entryIndex ? {
+                ...entry,
+                fields: entry.fields.map((field, index) => index === fieldIndex ? { ...field, value } : field),
+              } : entry),
+            }));
+          }}
+        />
       ) : (
         <LoginPage
           banner={banner}
@@ -96,7 +125,7 @@ export default function App() {
 
       <Text dimColor>{"─".repeat(contentWidth)}</Text>
       <Box gap={3}>
-        {unlocked && <Text dimColor>j/k or ↑/↓ move · enter open · esc back</Text>}
+        {unlocked && <Text dimColor>{prompting ? "enter confirm · esc cancel" : editing ? "enter save · esc cancel" : "j/k or ↑/↓ move · enter open/reveal · i edit · esc back"}</Text>}
         {!unlocked && <Text><Text color={green}>enter</Text><Text dimColor> submit</Text></Text>}
         {unlocked && <Text><Text color={green}>ctrl+l</Text><Text dimColor> lock</Text></Text>}
         <Text><Text color={green}>ctrl+q</Text><Text dimColor> quit</Text></Text>
