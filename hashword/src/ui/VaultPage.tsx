@@ -149,12 +149,12 @@ export default function VaultPage({ section, entries, onFieldSave, onEditingChan
   }
 
   return (
-    <Box flexGrow={1} flexDirection="row" gap={1} paddingY={1}>
-      <Box width="40%" flexShrink={0} flexDirection="column" paddingX={1} borderColor="gray">
+    <Box flexGrow={1} flexDirection="row" gap={2} paddingY={1}>
+      <Box width="40%" flexShrink={0} flexDirection="column" paddingX={1} borderStyle="round" borderColor={focusedColumn === "entries" ? "#39FF14" : "gray"}>
         <Box borderStyle="single" borderTop={false} borderLeft={false} borderRight={false} borderColor="gray" paddingBottom={1}>
           <Text bold color="#39FF14">{section.charAt(0).toUpperCase() + section.slice(1)} <Text dimColor>({entries.length})</Text></Text>
         </Box>
-        <Box flexShrink={0} marginTop={1} flexDirection="column">
+        <Box flexShrink={0} marginTop={1} flexDirection="column" gap={1}>
           {entries.map((entry, index) => {
             const selected = index === selectedIndex;
             const active = focusedColumn === "entries" && selected;
@@ -166,14 +166,14 @@ export default function VaultPage({ section, entries, onFieldSave, onEditingChan
           })}
         </Box>
       </Box>
-      <Box flexGrow={1} minWidth={0} flexDirection="column" paddingX={1} borderColor="gray">
+      <Box flexGrow={1} minWidth={0} flexDirection="column" paddingX={1} borderStyle="round" borderColor={focusedColumn === "details" ? "#39FF14" : "gray"}>
         {selectedEntry ? (
           <>
             <Box flexShrink={0} flexDirection="column" borderStyle="single" borderTop={false} borderLeft={false} borderRight={false} borderColor="gray" paddingBottom={1}>
               <Text bold color="#39FF14">{selectedEntry.name}</Text>
               <Text dimColor>Field {selectedDetailIndex + 1} of {fieldCount}</Text>
             </Box>
-            <Box flexShrink={0} marginTop={1} flexDirection="column">
+            <Box flexShrink={0} marginTop={1} flexDirection="column" gap={1}>
               {selectedEntry.fields.slice(firstVisibleField, firstVisibleField + visibleFieldCount).map((field, offset) => {
                 const index = firstVisibleField + offset;
                 const active = focusedColumn === "details" && index === selectedDetailIndex;
