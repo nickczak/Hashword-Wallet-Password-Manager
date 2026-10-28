@@ -20,13 +20,27 @@ const entriesBySection: Record<string, { name: string; details: string[] }[]> = 
 export default function VaultPage({ section }: VaultPageProps) {
   const entries = entriesBySection[section] ?? [];
   const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [focusedColumn, setFocusedColumn] = React.useState<"entries" | "details">("entries");
+  const [selectedDetailIndex, setSelectedDetailIndex] = React.useState(0);
   const selectedEntry = entries[selectedIndex];
 
-  useInput((input) => {
-    if (input.toLowerCase() === "j") {
-      setSelectedIndex((index) => Math.min(index + 1, entries.length - 1));
-    } else if (input.toLowerCase() === "k") {
-      setSelectedIndex((index) => Math.max(index - 1, 0));
+  useInput((input, key) => {
+    if (key.ctrl || key.meta) return;
+    if ((key.return || key.rightArrow) && selectedEntry) {
+      setFocusedColumn("details");
+      return;
+    }
+    if (key.escape || key.leftArrow) {
+      setFocusedColumn("entries");
+      return;
+    }
+    const direction = input.toLowerCase() === "j" || key.downArrow ? 1
+      : input.toLowerCase() === "k" || key.upArrow ? -1 : 0;
+    if (direction && focusedColumn === "entries") {
+      setSelectedIndex((index) => Math.max(0, Math.min(index + direction, entries.length - 1)));
+      setSelectedDetailIndex(0);
+    } else if (direction && selectedEntry) {
+      setSelectedDetailIndex((index) => Math.max(0, Math.min(index + direction, selectedEntry.details.length - 1)));
     }
   });
 
@@ -37,12 +51,9 @@ export default function VaultPage({ section }: VaultPageProps) {
         <Box marginTop={1} flexDirection="column">
           {entries.map((entry, index) => (
             <Text key={entry.name} color={index === selectedIndex ? "#39FF14" : undefined} bold={index === selectedIndex}>
-              {index === selectedIndex ? "> " : "  "}{entry.name}
+              {focusedColumn === "entries" && index === selectedIndex ? "> " : "  "}{entry.name}
             </Text>
           ))}
-        </Box>
-        <Box marginTop={1}>
-          <Text dimColor>j/k to move</Text>
         </Box>
       </Box>
       <Box flexGrow={1} flexDirection="column" paddingLeft={2}>
@@ -50,7 +61,11 @@ export default function VaultPage({ section }: VaultPageProps) {
           <>
             <Text bold color="#39FF14">{selectedEntry.name}</Text>
             <Box marginTop={1} flexDirection="column">
-              {selectedEntry.details.map((detail) => <Text key={detail}>{detail}</Text>)}
+              {selectedEntry.details.map((detail, index) => (
+                <Text key={detail} color={focusedColumn === "details" && index === selectedDetailIndex ? "#39FF14" : undefined}>
+                  {focusedColumn === "details" && index === selectedDetailIndex ? "> " : "  "}{detail}
+                </Text>
+              ))}
             </Box>
           </>
         ) : (

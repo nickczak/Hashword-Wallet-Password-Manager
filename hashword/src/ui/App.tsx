@@ -26,19 +26,20 @@ export default function App() {
 
   /** KEY BINDINGS
    *  enter - submit password
-   *  esc - lock the vault (only when unlocked)
-   *  q - quit
+   *  esc - return to entries (only when unlocked)
+   *  ctrl+l - lock the vault (only when unlocked)
+   *  ctrl+q - quit
    *  p - switch to passwords (only when unlocked)
    *  w - switch to wallets (only when unlocked)
    */
   useInput((input, key) => {
-    if (input.toLowerCase() === "q") {
+    if (key.ctrl && input.toLowerCase() === "q") {
       exit();
       return;
     }
 
     if (unlocked) {
-      if (key.escape) setUnlocked(false);
+      if (key.ctrl && input.toLowerCase() === "l") setUnlocked(false);
       if (input.toLowerCase() === "p") setSection("passwords");
       if (input.toLowerCase() === "w") setSection("wallets");
       return;
@@ -95,10 +96,10 @@ export default function App() {
 
       <Text dimColor>{"─".repeat(contentWidth)}</Text>
       <Box gap={3}>
-        {unlocked && <Text dimColor>p passwords / w wallets · j/k move · enter open/back</Text>}
+        {unlocked && <Text dimColor>j/k or ↑/↓ move · enter open · esc back</Text>}
         {!unlocked && <Text><Text color={green}>enter</Text><Text dimColor> submit</Text></Text>}
-        {unlocked && <Text><Text color={green}>esc</Text><Text dimColor> lock</Text></Text>}
-        <Text><Text color={green}>q</Text><Text dimColor> quit</Text></Text>
+        {unlocked && <Text><Text color={green}>ctrl+l</Text><Text dimColor> lock</Text></Text>}
+        <Text><Text color={green}>ctrl+q</Text><Text dimColor> quit</Text></Text>
       </Box>
     </Box>
   );
