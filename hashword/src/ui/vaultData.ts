@@ -48,4 +48,13 @@ export const initialEntries: Record<string, VaultEntry[]> = {
     passwordEntry("Example banking login", "alex-example", "https://bank.example.com"),
   ],
   wallets: [walletEntry("Example primary wallet"), walletEntry("Example savings wallet")],
+  account: [
+    {
+      name: "Account",
+      fields: [
+        { label: "Username", value: "alex-example" },
+        { label: "Password", value: "example-only", sensitive: true },
+      ],
+    },
+  ],
 };

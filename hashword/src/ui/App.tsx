@@ -38,6 +38,7 @@ export default function App() {
    *  ctrl+q - quit
    *  p - switch to passwords (only when unlocked)
    *  w - switch to wallets (only when unlocked)
+   *  a - switch to account (only when unlocked)
    */
   useInput((input, key) => {
     if (key.ctrl && input.toLowerCase() === "q") {
@@ -55,6 +56,7 @@ export default function App() {
       if (editing || prompting || key.ctrl || key.meta) return;
       if (input.toLowerCase() === "p") setSection("passwords");
       if (input.toLowerCase() === "w") setSection("wallets");
+      if (input.toLowerCase() === "a") setSection("account");
       return;
     }
 
@@ -88,7 +90,7 @@ export default function App() {
       <Text dimColor>{"─".repeat(contentWidth)}</Text>
 
       <Box justifyContent="center" gap={1}>
-        {["passwords", "wallets"].map((tab) => (
+        {["passwords", "wallets", "account"].map((tab) => (
           <Box key={tab} borderStyle="single" borderColor={unlocked && section === tab ? green : "gray"} paddingX={1}>
             <Text color={unlocked && section === tab ? green : "gray"}>
               {unlocked ? tab[0] : "🔒"} {tab}
