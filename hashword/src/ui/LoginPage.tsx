@@ -4,9 +4,10 @@ interface LoginPageProps {
   banner: string;
   showBanner: boolean;
   enteredPassword: string;
+  message?: string;
 }
 
-export default function LoginPage({ banner, showBanner, enteredPassword }: LoginPageProps) {
+export default function LoginPage({ banner, showBanner, enteredPassword, message }: LoginPageProps) {
   return (
     <Box flexGrow={1} flexBasis={0} flexDirection="column" alignItems="center" justifyContent="center" paddingX={1}>
       {showBanner && (
@@ -31,6 +32,7 @@ export default function LoginPage({ banner, showBanner, enteredPassword }: Login
           )}
         </Box>
       </Box>
+      {message && <Box marginTop={1}><Text dimColor>{message}</Text></Box>}
     </Box>
   );
 }

@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { Box, Text, useApp, useInput, useWindowSize } from "ink";
 import LoginPage from "./LoginPage.js";
 import VaultPage from "./VaultPage.js";
-import { initialEntries } from "./vaultData.js";
+import { createEmptyVault } from "./vaultData.js";
 
 const banner = readFileSync(
   new URL("../../public/assets/banner.txt", import.meta.url),
@@ -11,22 +11,22 @@ const banner = readFileSync(
 ).trimEnd();
 
 const green = "#39FF14";
-// The terminal preview uses the same demo master key for unlocking and revealing.
-const verifyMasterKey = (value: string) => value === "password";
+// Fail closed until vault encryption and master-key verification are connected.
+const verifyMasterKey = () => false;
 
 export default function App() {
   const { columns, rows } = useWindowSize();
   const { exit } = useApp();
   const [unlocked, setUnlocked] = React.useState(false);
   const [section, setSection] = React.useState("passwords");
+  const [loginMessage, setLoginMessage] = React.useState("");
   const [enteredPassword, setEnteredPassword] = React.useState("");
-  const [entriesBySection, setEntriesBySection] = React.useState(initialEntries);
+  const [entriesBySection, setEntriesBySection] = React.useState(createEmptyVault);
   const [editing, setEditing] = React.useState(false);
   const [prompting, setPrompting] = React.useState(false);
 
   const handlePasswordSubmit = () => {
-    // For demonstration purposes, the preview password is "password".
-    setUnlocked(verifyMasterKey(enteredPassword));
+    setLoginMessage("Vault unlocking is unavailable until authentication and encryption are connected.");
     setEnteredPassword("");
   };
 
@@ -51,6 +51,7 @@ export default function App() {
         setEditing(false);
         setPrompting(false);
         setUnlocked(false);
+        setEntriesBySection(createEmptyVault());
         return;
       }
       if (editing || prompting || key.ctrl || key.meta) return;
@@ -122,6 +123,7 @@ export default function App() {
           banner={banner}
           showBanner={contentWidth >= 58 && rows >= 24}
           enteredPassword={enteredPassword}
+          message={loginMessage}
         />
       )}
 
