@@ -1,0 +1,141 @@
+export const navigation = [
+  { id: "api-overview", title: "Overview" },
+  { id: "authentication", title: "Authentication" },
+  { id: "vault-envelope", title: "Vault envelope" },
+  { id: "create-vault", title: "Create a vault", method: "POST" },
+  { id: "get-vault", title: "Retrieve your vault", method: "GET" },
+  { id: "update-vault", title: "Update your vault", method: "PUT" },
+  { id: "errors", title: "Errors" },
+];
+
+<section id="api-overview">
+
+# Hashword API
+
+**DRAFT · v1**
+
+The proposed HTTP interface for sharing an encrypted vault between Hashword clients.
+
+> This API is not implemented. Routes, status codes, and examples below describe the proposed contract and may change. No production base URL is available.
+
+</section>
+
+<section id="authentication">
+
+## Authentication
+
+All vault endpoints will require a valid account session. The server will determine vault ownership from that session.
+
+```http
+Authorization: Bearer <session-token>
+Content-Type: application/json
+```
+
+Bearer authentication is planned for terminal clients. Authentication endpoints and browser session handling are still being designed. Never send the vault master key to the API.
+
+</section>
+
+<section id="vault-envelope">
+
+## Vault envelope
+
+The envelope holds the encrypted document and its versioned encryption metadata. Encryption and decryption happen locally.
+
+- **`envelope`** (object): encrypted vault and crypto metadata; exact schema pending.
+- **`revision`** (integer): server-managed version of the saved vault.
+- **`expectedRevision`** (integer): last known revision, required for updates.
+
+Envelope examples are abbreviated for readability and are not valid request payloads.
+
+</section>
+
+<section id="create-vault">
+
+## Create a vault
+
+<Endpoint method="POST" path="/v1/vault" />
+
+Initialize the authenticated user’s encrypted vault. An existing vault must never be overwritten by a creation request.
+
+### Request body
+
+```json
+{
+  "envelope": { "…": "encrypted vault envelope" }
+}
+```
+
+### Response — 201 Created
+
+```json
+{
+  "envelope": { "…": "encrypted vault envelope" },
+  "revision": 1
+}
+```
+
+</section>
+
+<section id="get-vault">
+
+## Retrieve your vault
+
+<Endpoint method="GET" path="/v1/vault" />
+
+Return the encrypted envelope and revision belonging to the authenticated user. Decryption happens in the client.
+
+### Request body
+
+No request body.
+
+### Response — 200 OK
+
+```json
+{
+  "envelope": { "…": "encrypted vault envelope" },
+  "revision": 1
+}
+```
+
+</section>
+
+<section id="update-vault">
+
+## Update your vault
+
+<Endpoint method="PUT" path="/v1/vault" />
+
+Save an encrypted envelope using the last known revision. If another client has saved first, the server rejects the update with a conflict.
+
+### Request body
+
+```json
+{
+  "envelope": { "…": "encrypted vault envelope" },
+  "expectedRevision": 1
+}
+```
+
+### Response — 200 OK
+
+```json
+{
+  "revision": 2
+}
+```
+
+</section>
+
+<section id="errors">
+
+## Errors
+
+Proposed status codes. The error response body is not yet specified.
+
+- **400 Bad Request**: the envelope or revision is invalid.
+- **401 Unauthorized**: the session is missing, expired, or revoked.
+- **404 Not Found**: the account has not initialized a vault.
+- **409 Conflict**: the vault already exists, or its revision changed. Fetch the latest vault before retrying an update.
+- **413 Content Too Large**: the encrypted envelope exceeds the configured request limit.
+
+</section>
