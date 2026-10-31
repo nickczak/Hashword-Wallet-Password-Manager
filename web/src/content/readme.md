@@ -1,44 +1,42 @@
-A terminal-style wallet and password manager, built with React and Ink, with a browser companion built in Next.js.
+Hashword is a wallet and password manager in development, with a React/Ink terminal preview and a Next.js browser companion.
 
-Navigate passwords, wallets, and account details using the keyboard. The interface uses green block lettering, masked fields, and familiar terminal controls.
+![Earlier Hashword terminal demonstration](/showcase-desktop.gif)
 
-![Animated demonstration of the Hashword terminal interface](/showcase-desktop.gif)
+The GIF shows an earlier interface preview with illustrative records. It does not show current stored vault contents.
 
-## Current status
+## What works now
 
-Hashword is **in development**. Both apps start without preloaded vault records. No hardcoded master key is accepted. Vault unlocking remains unavailable until authentication and encryption are connected.
+The browser companion supports account registration, username/password sign-in, session restoration, and sign-out. The terminal tab contains these account controls. The API tab documents current authentication routes and a proposed vault interface.
 
-Encrypted vault storage, account authentication, and SSH access are planned. The GIF above shows an earlier interface preview with illustrative records, not current vault contents.
+The website and backend run in one Next.js service. Better Auth manages credentials and browser session cookies, with account data stored in Neon PostgreSQL. Database credentials stay on the server.
 
-## Connect over SSH
+Signing in does not unlock a vault yet. There is no browser vault editor or persistent vault storage. The installed CLI has a tested Node.js encryption module, but its master-key prompt is still blocked until the UI and storage are connected. There is no SQLite storage.
 
-SSH access will let you open Hashword from your own terminal without installing the app.
+## Account password versus master password
 
-**The public SSH service is not live yet.** No connection hostname has been published. Once it is available, replace `SSH_HOST` below with the announced hostname:
+An account password signs you in through Better Auth. A separate master password will decrypt your vault locally. Saved passwords and wallet secrets will be encrypted before upload; the database will hold their encrypted envelope. The encryption module already implements this format, but the complete saving/unlocking flow is still being built.
+
+## Run the website locally
+
+Use Node.js 22 or newer. From the repository root:
 
 ```sh
-ssh -t SSH_HOST
+cd web
+npm ci
 ```
 
-This is a command template, not a working address. The `-t` option requests an interactive terminal.
+Copy `.env.example` to `.env.local` if it does not exist. Set the Neon `DATABASE_URL`, a random `BETTER_AUTH_SECRET` of at least 32 characters, and `BETTER_AUTH_URL=http://localhost:3000`. Generate the secret with `openssl rand -base64 32`. Keep the file private.
 
-The intended connection flow is:
+From `web/`, create the authentication tables and start Next.js:
 
-1. Open a terminal with an SSH client installed.
-2. Connect using the published SSH command.
-3. Verify the server's host-key fingerprint against the published fingerprint before trusting a first connection.
-4. Hashword opens automatically; follow its account and master-key prompts.
-5. Use `Ctrl+Q` to exit Hashword. The hosted service is intended to close the connection when you exit.
+```sh
+npx auth@latest migrate --config ./auth.ts
+npm run dev
+```
 
-Account setup and host-key details will be documented when the service launches.
+Open http://localhost:3000 and choose Register. Create a test account, sign out, sign in, and reload to verify the session. A fresh database needs the auth migration; setting its URL alone is not enough. Restart the dev server after editing environment settings.
 
-### Where the app runs
-
-Over SSH, Hashword runs on the remote server. SSH protects the connection in transit, but the remote application can access the master key you enter and any secrets it decrypts. This differs from an installed client that performs vault encryption and decryption on your own machine.
-
-## Run the terminal preview locally
-
-Install Node.js 22 or newer and download or clone the [Hashword repository](https://github.com/nickczak/Hashword-Wallet-Password-Manager).
+## Run the terminal preview
 
 From the repository root:
 
@@ -48,9 +46,9 @@ npm ci
 npm run dev
 ```
 
-The app opens to the master-key prompt. Unlocking will become available when the authentication and encryption services are connected.
+The CLI opens to a master-key prompt. `Enter` submits it and reports that unlocking is unavailable; `Ctrl+Q` exits. Vault navigation remains inaccessible until unlocking is implemented.
 
-To build and install the local command:
+To install the local command, run these from `hashword/`:
 
 ```sh
 npm run build
@@ -58,22 +56,12 @@ npm link
 hashword
 ```
 
-## Keyboard controls
+## SSH and future work
 
-- `Enter`: submit the master key, open an entry, or confirm a prompt.
-- `j` / `k` or arrow keys: move through vault entries.
-- `p`: open passwords.
-- `w`: open wallets.
-- `a`: open account details.
-- `i`: edit a selected field.
-- `Esc`: cancel an edit or return to the entry list.
-- `Ctrl+L`: lock the vault.
-- `Ctrl+Q`: quit.
+No public SSH service or connection hostname is available. The browser's terminal appearance is a web interface, not an SSH connection. A future SSH-hosted UI would run and decrypt secrets on the SSH server, unlike a locally installed client.
 
-Vault navigation shortcuts are intended for unlocked sessions; unlocking is currently unavailable.
+Next is browser encryption, master-password setup, and one authenticated vault route backed by one database table. CLI account access, offline caching, recovery, and SSH hosting are later work. Account-password reset and email-verification delivery are not configured yet.
 
-## Browser companion
+## Development checks
 
-The **terminal** selection previews the unlock experience. The **api** selection documents the proposed vault API. This README describes the app and connection options.
-
-The browser terminal is currently a simulation, not an SSH connection. The planned API will connect clients to encrypted vault storage in Neon, with encryption and decryption performed in the local client. An SSH-hosted client would perform those operations on the SSH server instead.
+Root `npm test`, `npm run typecheck`, and `npm run build` target the CLI. Run the website's `test`, `typecheck`, `lint`, and `build` scripts from `web/`. Passing module tests does not verify a complete encrypted-vault storage flow.

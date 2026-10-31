@@ -1,10 +1,10 @@
 export const navigation = [
   { id: "api-overview", title: "Overview" },
-  { id: "authentication", title: "Authentication" },
-  { id: "vault-envelope", title: "Vault envelope" },
-  { id: "create-vault", title: "Create a vault", method: "POST" },
-  { id: "get-vault", title: "Retrieve your vault", method: "GET" },
-  { id: "update-vault", title: "Update your vault", method: "PUT" },
+  { id: "authentication", title: "Account authentication" },
+  { id: "vault-envelope", title: "Planned vault format" },
+  { id: "create-vault", title: "Planned creation", method: "POST" },
+  { id: "get-vault", title: "Planned retrieval", method: "GET" },
+  { id: "update-vault", title: "Planned saving", method: "PUT" },
   { id: "errors", title: "Errors" },
 ];
 
@@ -12,117 +12,68 @@ export const navigation = [
 
 # Hashword API
 
-**DRAFT · v1**
+Account authentication runs inside the same Next.js application as the website. Browser requests use the website's origin; no separate API service is required. Neon stores authentication data. No production base URL is published here.
 
-The proposed HTTP interface for sharing an encrypted vault between Hashword clients.
-
-> This API is not implemented. Routes, status codes, and examples below describe the proposed contract and may change. No production base URL is available.
+**Authentication is implemented. Vault storage is planned and its routes below do not exist yet.**
 
 </section>
 
 <section id="authentication">
 
-## Authentication
+## Account authentication
 
-All vault endpoints will require a valid account session. The server will determine vault ownership from that session.
+Better Auth's browser SDK handles these routes under `/api/auth`:
 
-```http
-Authorization: Bearer <session-token>
-Content-Type: application/json
-```
+| Method | Route | Purpose |
+| --- | --- | --- |
+| POST | `/api/auth/sign-up/email` | Register with name, email, username, and account password |
+| POST | `/api/auth/sign-in/username` | Sign in with username and account password |
+| GET | `/api/auth/get-session` | Read the current session; returns null when signed out |
+| POST | `/api/auth/sign-out` | End the browser session |
 
-Bearer authentication is planned for terminal clients. Authentication endpoints and browser session handling are still being designed. Never send the vault master key to the API.
+The website calls `register`, `login`, `getAccount`, and `logout` from `src/lib/auth-client.ts`. Its account helpers return public `id` and `name` fields; `getAccount` returns null when signed out. Raw Better Auth login/registration responses contain a nested `user` object.
+
+Sessions use HttpOnly browser cookies managed by Better Auth. There is no CLI bearer-token flow or custom `/api/login` route. Registration requires an account password of at least 12 characters. Never send a vault master password to these endpoints. Password-reset and email-verification delivery are not configured in the app.
 
 </section>
 
 <section id="vault-envelope">
 
-## Vault envelope
+## Planned vault format
 
-The envelope holds the encrypted document and its versioned encryption metadata. Encryption and decryption happen locally.
+The Node.js encryption module implements a version-1 envelope with `vaultId`, `ownerId`, Argon2id settings and salt, an encrypted data key, and an encrypted JSON document. AES-256-GCM nonces and authentication tags accompany encrypted values. Binary fields use base64.
 
-- **`envelope`** (object): encrypted vault and crypto metadata; exact schema pending.
-- **`revision`** (integer): server-managed version of the saved vault.
-- **`expectedRevision`** (integer): last known revision, required for updates.
-
-Envelope examples are abbreviated for readability and are not valid request payloads.
+Browser encryption and HTTP storage are not connected. A future vault response will include the envelope and a server-managed revision. Clients must decrypt locally and validate the document before displaying it. The backend must derive ownership from the verified session and enforce it on every operation.
 
 </section>
 
 <section id="create-vault">
 
-## Create a vault
+## Planned creation
 
-<Endpoint method="POST" path="/v1/vault" />
+<Endpoint method="POST" path="/api/vault" />
 
-Initialize the authenticated user’s encrypted vault. An existing vault must never be overwritten by a creation request.
-
-### Request body
-
-```json
-{
-  "envelope": { "…": "encrypted vault envelope" }
-}
-```
-
-### Response — 201 Created
-
-```json
-{
-  "envelope": { "…": "encrypted vault envelope" },
-  "revision": 1
-}
-```
+**Not implemented.** Create the signed-in user's encrypted vault once. Reject attempts to replace an existing vault. The proposed request contains `envelope`; the response contains its ID, envelope, and initial revision. Account creation and vault initialization must be resumable if the initial upload fails.
 
 </section>
 
 <section id="get-vault">
 
-## Retrieve your vault
+## Planned retrieval
 
-<Endpoint method="GET" path="/v1/vault" />
+<Endpoint method="GET" path="/api/vault" />
 
-Return the encrypted envelope and revision belonging to the authenticated user. Decryption happens in the client.
-
-### Request body
-
-No request body.
-
-### Response — 200 OK
-
-```json
-{
-  "envelope": { "…": "encrypted vault envelope" },
-  "revision": 1
-}
-```
+**Not implemented.** Return only the authenticated owner's encrypted envelope and revision. Decryption happens in the client. An account without a vault should be directed to master-password setup.
 
 </section>
 
 <section id="update-vault">
 
-## Update your vault
+## Planned saving
 
-<Endpoint method="PUT" path="/v1/vault" />
+<Endpoint method="PUT" path="/api/vault" />
 
-Save an encrypted envelope using the last known revision. If another client has saved first, the server rejects the update with a conflict.
-
-### Request body
-
-```json
-{
-  "envelope": { "…": "encrypted vault envelope" },
-  "expectedRevision": 1
-}
-```
-
-### Response — 200 OK
-
-```json
-{
-  "revision": 2
-}
-```
+**Not implemented.** Submit `envelope` and `expectedRevision`. Update atomically only when ownership, vault ID, and revision match. Reject conflicts instead of overwriting another device's changes. Keep the local draft until the server acknowledges the save.
 
 </section>
 
@@ -130,12 +81,15 @@ Save an encrypted envelope using the last known revision. If another client has 
 
 ## Errors
 
-Proposed status codes. The error response body is not yet specified.
+The current auth route returns a generic **503** if backend initialization or request handling throws. Check private environment settings, Neon connectivity, and the auth migration. Better Auth handles credential, validation, session, and rate-limit responses; the browser SDK surfaces their messages.
 
-- **400 Bad Request**: the envelope or revision is invalid.
-- **401 Unauthorized**: the session is missing, expired, or revoked.
-- **404 Not Found**: the account has not initialized a vault.
-- **409 Conflict**: the vault already exists, or its revision changed. Fetch the latest vault before retrying an update.
-- **413 Content Too Large**: the encrypted envelope exceeds the configured request limit.
+The following statuses describe the **proposed vault contract**, not existing handlers:
+
+- **400**: invalid encrypted envelope or revision.
+- **401**: missing or invalid account session.
+- **403**: rejected ownership or request-origin check.
+- **404**: no initialized vault.
+- **409**: existing vault or conflicting revision.
+- **413**: request exceeds the size limit.
 
 </section>
