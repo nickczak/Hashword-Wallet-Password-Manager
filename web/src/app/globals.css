@@ -20,6 +20,11 @@ body {
   color: #000000;
 }
 
+.terminal-input {
+  caret-color: var(--color-terminal-accent);
+  caret-shape: block;
+}
+
 .terminal-cursor {
   width: 1ch;
   height: 1.25em;
