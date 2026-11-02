@@ -2,10 +2,10 @@
   "name": "hashword-workspace",
   "private": true,
   "scripts": {
-    "dev": "npm --prefix hashword run dev",
-    "build": "npm --prefix hashword run build",
-    "start": "npm --prefix hashword start",
-    "typecheck": "npm --prefix hashword run typecheck",
-    "test": "npm --prefix hashword test"
+    "dev": "npm --prefix cli run dev",
+    "build": "npm --prefix cli run build",
+    "start": "npm --prefix cli start",
+    "typecheck": "npm --prefix cli run typecheck",
+    "test": "npm --prefix cli test"
   }
 }
