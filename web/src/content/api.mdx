@@ -22,7 +22,7 @@ Account authentication runs inside the same Next.js application as the website. 
 
 ## Account authentication
 
-Better Auth's browser SDK handles these routes under `/api/auth`:
+Both clients use HTTP requests to these Better Auth routes under `/api/auth`:
 
 | Method | Route | Purpose |
 | --- | --- | --- |
@@ -31,9 +31,9 @@ Better Auth's browser SDK handles these routes under `/api/auth`:
 | GET | `/api/auth/get-session` | Read the current session; returns null when signed out |
 | POST | `/api/auth/sign-out` | End the browser session |
 
-The website calls `register`, `login`, `getAccount`, and `logout` from `src/lib/auth-client.ts`. Its account helpers return public `id` and `name` fields; `getAccount` returns null when signed out. Raw Better Auth login/registration responses contain a nested `user` object.
+The website calls `register`, `login`, `getAccount`, and `logout` from `src/lib/api.ts`. Its account helpers return public `id` and `name` fields; `getAccount` returns null when signed out. Raw Better Auth login/registration responses contain a nested `user` object.
 
-Sessions use HttpOnly browser cookies managed by Better Auth. There is no CLI bearer-token flow or custom `/api/login` route. Registration requires an account password of at least 12 characters. Never send a vault master password to these endpoints. Password-reset and email-verification delivery are not configured in the app.
+Sessions use HttpOnly browser cookies managed by Better Auth. There is no CLI bearer-token flow or custom `/api/login` route. Registration requires an account password of at least 12 characters. Password-reset and email-verification delivery are not configured in the app.
 
 </section>
 
@@ -41,9 +41,7 @@ Sessions use HttpOnly browser cookies managed by Better Auth. There is no CLI be
 
 ## Planned vault format
 
-The Node.js encryption module implements a version-1 envelope with `vaultId`, `ownerId`, Argon2id settings and salt, an encrypted data key, and an encrypted JSON document. AES-256-GCM nonces and authentication tags accompany encrypted values. Binary fields use base64.
-
-Browser encryption and HTTP storage are not connected. A future vault response will include the envelope and a server-managed revision. Clients must decrypt locally and validate the document before displaying it. The backend must derive ownership from the verified session and enforce it on every operation.
+Vault storage is not implemented. Both clients will use the same backend routes. The backend must check the session and enforce ownership on every request. Storage protection and the response format still need to be chosen.
 
 </section>
 
@@ -53,7 +51,7 @@ Browser encryption and HTTP storage are not connected. A future vault response w
 
 <Endpoint method="POST" path="/api/vault" />
 
-**Not implemented.** Create the signed-in user's encrypted vault once. Reject attempts to replace an existing vault. The proposed request contains `envelope`; the response contains its ID, envelope, and initial revision. Account creation and vault initialization must be resumable if the initial upload fails.
+**Not implemented.** Create the signed-in user's vault. The request and storage formats are still to be defined.
 
 </section>
 
@@ -63,7 +61,7 @@ Browser encryption and HTTP storage are not connected. A future vault response w
 
 <Endpoint method="GET" path="/api/vault" />
 
-**Not implemented.** Return only the authenticated owner's encrypted envelope and revision. Decryption happens in the client. An account without a vault should be directed to master-password setup.
+**Not implemented.** Return only the authenticated user's vault. An unauthenticated request must be rejected.
 
 </section>
 
@@ -73,7 +71,7 @@ Browser encryption and HTTP storage are not connected. A future vault response w
 
 <Endpoint method="PUT" path="/api/vault" />
 
-**Not implemented.** Submit `envelope` and `expectedRevision`. Update atomically only when ownership, vault ID, and revision match. Reject conflicts instead of overwriting another device's changes. Keep the local draft until the server acknowledges the save.
+**Not implemented.** Save changes to the authenticated user's vault. Validate inputs and reject conflicting updates. The payload format is still to be defined.
 
 </section>
 
@@ -81,11 +79,11 @@ Browser encryption and HTTP storage are not connected. A future vault response w
 
 ## Errors
 
-The current auth route returns a generic **503** if backend initialization or request handling throws. Check private environment settings, Neon connectivity, and the auth migration. Better Auth handles credential, validation, session, and rate-limit responses; the browser SDK surfaces their messages.
+The current auth route returns a generic **503** if backend initialization or request handling throws. Check private environment settings, Neon connectivity, and the auth migration. Better Auth handles credential, validation, session, and rate-limit responses; the HTTP helpers report failed requests.
 
 The following statuses describe the **proposed vault contract**, not existing handlers:
 
-- **400**: invalid encrypted envelope or revision.
+- **400**: invalid vault data or revision.
 - **401**: missing or invalid account session.
 - **403**: rejected ownership or request-origin check.
 - **404**: no initialized vault.

@@ -13,12 +13,11 @@ and a Next.js browser companion.
 | --- | --- |
 | Browser accounts | Register, sign in with a username and account password, restore the session, and sign out |
 | Backend | Better Auth runs inside Next.js and stores accounts and sessions in Neon PostgreSQL |
-| CLI | Opens a terminal interface; master-password unlocking is deliberately blocked |
-| Encryption module | Creates, encrypts, decrypts, and locks vault sessions in Node.js; tested separately from the interface |
+| CLI | Signs in through the web API, verifies the session, and opens the account vault screen |
 | Vault storage | Not implemented; neither app currently saves or restores vault entries |
 
-There is no SQLite storage, separate Fastify server, Supabase integration, or live
-SSH service. Signing into an account does not unlock a vault yet.
+There is no SQLite storage, separate Fastify server, or Supabase integration.
+The vault screen is a placeholder until backend vault storage exists.
 
 ![Earlier Hashword terminal interface demonstration](showcase-desktop.gif)
 
@@ -29,16 +28,16 @@ vault contents.
 
 ```text
 Browser → Next.js auth routes → Neon PostgreSQL
-CLI     → terminal preview (not connected to account login or storage)
+CLI     → Next.js auth routes → Neon PostgreSQL
 ```
 
-The browser uses Better Auth's SDK and an HttpOnly session cookie. Database
+The browser uses plain HTTP requests and an HttpOnly session cookie. Database
 credentials and the server auth secret stay in the Next.js environment.
 
-An account password signs you in and is processed by Better Auth. A separate
-vault master password will unlock encrypted vault contents locally. The existing
-CLI encryption module implements that cryptography, but browser encryption and
-UI/storage integration are still pending. See [encryption details](docs/vault-encryption.md).
+The CLI uses the same username and account password as the website. It keeps its
+session cookie in memory and sends requests to the web API. Vault storage and
+access control belong in the backend; no separate master password or local
+vault encryption module is used.
 
 ## Run the website
 
@@ -67,18 +66,20 @@ npm run dev
 Open http://localhost:3000 and choose Register. Keep `.env.local` private.
 See [website setup and troubleshooting](web/README.md) for the complete flow.
 
-## Run the terminal preview
+## Run the CLI
 
 From the repository root:
 
 ```sh
-cd hashword
+cd cli
 npm ci
 npm run dev
 ```
 
-The master-key prompt cannot unlock a vault yet. `Enter` submits the prompt and
-`Ctrl+Q` exits. To install the local command:
+Run the website first. The CLI defaults to `http://localhost:3000`; set
+`HASHWORD_API_URL` to the deployed website's HTTPS origin when needed.
+Enter your username and account password. `Tab` switches fields, `Enter` advances
+or submits, `L` signs out from the vault screen, and `Ctrl+Q` exits. To install the local command:
 
 ```sh
 npm run build
@@ -107,7 +108,6 @@ npm --prefix web run build
 
 ## Next steps
 
-Add browser encryption and master-password setup, then one authenticated vault
-route and one database table for encrypted envelopes. Connect saving, loading,
-and locking before adding CLI account access or more advanced features.
-See the [current implementation plan](docs/neon-implementation-plan.md).
+Implement authenticated vault storage in the web backend, then connect both
+interfaces to the same vault API. The CLI should only handle input, API requests,
+and displaying results. See the [current implementation plan](docs/neon-implementation-plan.md).

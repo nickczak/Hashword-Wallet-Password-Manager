@@ -21,7 +21,7 @@ the server and passes the rendered documentation into `HomeTabs`. Only tab
 switching, the terminal animation, and account controls need browser JavaScript.
 
 ```text
-Login.tsx → lib/auth-client.ts → /api/auth/* → server/auth.ts → Neon
+Login.tsx → lib/api.ts → /api/auth/* → server/auth.ts → Neon
 ```
 
 | File | Responsibility |
@@ -29,12 +29,12 @@ Login.tsx → lib/auth-client.ts → /api/auth/* → server/auth.ts → Neon
 | `src/app/page.tsx` | Composes the page on the server |
 | `src/components/HomeTabs.tsx` | Tab selection and terminal introduction in the browser |
 | `src/components/Login.tsx` | Account form, loading/errors, session restore, and sign-out |
-| `src/lib/auth-client.ts` | Small wrapper around Better Auth's browser SDK |
+| `src/lib/api.ts` | HTTP helpers for login, registration, session checks, and logout |
 | `src/server/auth.ts` | Backend auth configuration and shared PostgreSQL connection pool |
 | `src/app/api/auth/[...all]/route.ts` | Next.js GET/POST handlers for Better Auth |
 | `auth.ts` | Loads environment settings for the migration CLI |
 
-The browser SDK manages the HttpOnly session cookie. It does not store a bearer
+The browser automatically stores and sends the HttpOnly session cookie. It does not store a bearer
 token in local storage. The backend currently enables Better Auth's username
 plugin and database-backed rate limiting; CLI bearer login is not implemented.
 
@@ -108,6 +108,7 @@ npm run build
 Tests exercise the account API wrapper. Successful tests/builds do not substitute
 for registering and signing in against a configured database.
 
-Vault encryption, storage, and the master-password screen are the next work item.
-The Node.js encryption module lives in `../hashword/src/lib/vaultCrypto.ts` and
-cannot be imported directly into a browser bundle because it uses `node:crypto`.
+The CLI now signs in through these same auth routes and opens a placeholder
+vault screen. Vault storage and read/write routes remain to be implemented on
+the backend. The local vault encryption module and separate master-password
+flow have been removed.

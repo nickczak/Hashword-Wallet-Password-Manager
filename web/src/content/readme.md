@@ -10,11 +10,11 @@ The browser companion supports account registration, username/password sign-in, 
 
 The website and backend run in one Next.js service. Better Auth manages credentials and browser session cookies, with account data stored in Neon PostgreSQL. Database credentials stay on the server.
 
-Signing in does not unlock a vault yet. There is no browser vault editor or persistent vault storage. The installed CLI has a tested Node.js encryption module, but its master-key prompt is still blocked until the UI and storage are connected. There is no SQLite storage.
+The CLI signs in through the web API and opens a placeholder vault screen. There is no vault editor or persistent vault storage yet.
 
-## Account password versus master password
+## Shared account login
 
-An account password signs you in through Better Auth. A separate master password will decrypt your vault locally. Saved passwords and wallet secrets will be encrypted before upload; the database will hold their encrypted envelope. The encryption module already implements this format, but the complete saving/unlocking flow is still being built.
+The website and CLI use the same account password through Better Auth. The CLI has no local vault encryption module or separate master password. Vault storage and access control will be provided by the web backend.
 
 ## Run the website locally
 
@@ -41,14 +41,14 @@ Open http://localhost:3000 and choose Register. Create a test account, sign out,
 From the repository root:
 
 ```sh
-cd hashword
+cd cli
 npm ci
 npm run dev
 ```
 
-The CLI opens to a master-key prompt. `Enter` submits it and reports that unlocking is unavailable; `Ctrl+Q` exits. Vault navigation remains inaccessible until unlocking is implemented.
+Run the website first; the CLI defaults to http://localhost:3000. Set HASHWORD_API_URL for a deployed HTTPS backend. Enter your username and account password; Tab switches fields, Enter submits, L signs out, and Ctrl+Q exits.
 
-To install the local command, run these from `hashword/`:
+To install the local command, run these from `cli/`:
 
 ```sh
 npm run build
@@ -56,12 +56,10 @@ npm link
 hashword
 ```
 
-## SSH and future work
+## Future work
 
-No public SSH service or connection hostname is available. The browser's terminal appearance is a web interface, not an SSH connection. A future SSH-hosted UI would run and decrypt secrets on the SSH server, unlike a locally installed client.
-
-Next is browser encryption, master-password setup, and one authenticated vault route backed by one database table. CLI account access, offline caching, recovery, and SSH hosting are later work. Account-password reset and email-verification delivery are not configured yet.
+Next is backend vault storage and authenticated vault read/write routes shared by the website and CLI. Account-password reset and email-verification delivery are not configured yet.
 
 ## Development checks
 
-Root `npm test`, `npm run typecheck`, and `npm run build` target the CLI. Run the website's `test`, `typecheck`, `lint`, and `build` scripts from `web/`. Passing module tests does not verify a complete encrypted-vault storage flow.
+Root `npm test`, `npm run typecheck`, and `npm run build` target the CLI. Run the website's `test`, `typecheck`, `lint`, and `build` scripts from `web/`. API client tests mock HTTP; live authentication needs the configured backend.
