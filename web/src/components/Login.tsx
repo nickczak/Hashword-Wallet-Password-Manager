@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { getAccount, login, logout, register, type Account } from "@/lib/auth-client";
+import { getAccount, login, logout, register, type Account } from "@/lib/api";
 
 const banner = String.raw`▄▄   ▄▄      ▄▄                                 ▄▄             ▄▄▄  ▄▄▄
 ██   ██      ██                                 ██            █▀██  ██               █▄                           █▄
@@ -67,7 +67,7 @@ export default function Login() {
       {account ? (
         <div className="space-y-3">
           <p>Signed in as {account.name}.</p>
-          <p className="text-neutral-400"># Your account is connected. Encrypted vault setup is the next step.</p>
+          <p className="text-neutral-400"># Your account is connected. Vault storage is not available yet.</p>
           <button type="button" disabled={pending} onClick={signOut} className={buttonClass}>Sign out</button>
         </div>
       ) : (
@@ -83,7 +83,7 @@ export default function Login() {
             <label className="block">Account password
               <input name="password" type="password" autoComplete={creating ? "new-password" : "current-password"} required minLength={12} maxLength={128} className={inputClass} />
             </label>
-            <p className="text-xs text-neutral-400">This signs you into your account. Your vault master password is separate.</p>
+            <p className="text-xs text-neutral-400">Use the same account to sign in on the website or CLI.</p>
             <div className="flex gap-5">
               <button type="submit" className={buttonClass}>{creating ? "Create account" : "Sign in"}</button>
               <button type="button" onClick={() => { setCreating(!creating); setMessage(""); }} className={buttonClass}>
