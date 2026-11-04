@@ -1,15 +1,15 @@
-<p align="center"><img src="hashword_logo.png" alt="Hashword logo" width="240"></p>
+<p align="center"><img src="hashword_logo.png" alt="Hashword logo" width="320"></p>
 
 <h4 align="center">A Wallet & Password Manager for your computer</h4>
 
 <p align="center">
-[![Vercel deployment status](https://img.shields.io/website?url=https%3A%2F%2Fhashword.site&label=Vercel%20deployment&logo=vercel)](https://hashword.site)
-[![Website: hashword.site](https://img.shields.io/badge/website-hashword.site-blue)](https://hashword.site)
+  <a href="https://hashword.site"><img src="https://img.shields.io/website?url=https%3A%2F%2Fhashword.site&amp;label=Vercel%20deployment&amp;logo=vercel" alt="Vercel deployment status"></a>
+  <a href="https://hashword.site"><img src="https://img.shields.io/badge/website-hashword.site-blue" alt="Website: hashword.site"></a>
 </p>
 
 ---
 
-<p align="center">![Earlier Hashword terminal interface demonstration](showcase-desktop.gif)
+<p align="center"><img src="showcase-desktop.gif" alt="Earlier Hashword terminal interface demonstration"></p>
 
 ## Run the website
 
