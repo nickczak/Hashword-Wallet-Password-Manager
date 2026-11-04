@@ -1,38 +1,13 @@
+![Hashword logo](hashword_logo.png)
+
+A Wallet & Password Manager for your computer
+
+[![Vercel deployment status](https://img.shields.io/website?url=https%3A%2F%2Fhashword.site&label=Vercel%20deployment&logo=vercel)](https://hashword.site)
+[![Website: hashword.site](https://img.shields.io/badge/website-hashword.site-blue)](https://hashword.site)
+
+---
+
 ![Earlier Hashword terminal interface demonstration](showcase-desktop.gif)
-
-A wallet and password manager in development, with a React/Ink terminal preview
-and a Next.js browser companion.
-
-## What works today
-
-| Part | Current behavior |
-| --- | --- |
-| Browser accounts | Register, sign in with a username and account password, restore the session, and sign out |
-| Backend | Better Auth runs inside Next.js and stores accounts and sessions in Neon PostgreSQL |
-| CLI | Signs in through the web API, verifies the session, and opens the account vault screen |
-| Vault storage | Not implemented; neither app currently saves or restores vault entries |
-
-There is no SQLite storage, separate Fastify server, or Supabase integration.
-The vault screen is a placeholder until backend vault storage exists.
-
-
-The GIF shows an earlier interface preview with illustrative records, not current
-vault contents.
-
-## Architecture
-
-```text
-Browser → Next.js auth routes → Neon PostgreSQL
-CLI     → Next.js auth routes → Neon PostgreSQL
-```
-
-The browser uses plain HTTP requests and an HttpOnly session cookie. Database
-credentials and the server auth secret stay in the Next.js environment.
-
-The CLI uses the same username and account password as the website. It keeps its
-session cookie in memory and sends requests to the web API. Vault storage and
-access control belong in the backend; no separate master password or local
-vault encryption module is used.
 
 ## Run the website
 
