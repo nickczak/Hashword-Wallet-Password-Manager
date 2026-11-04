@@ -1,4 +1,4 @@
-<p align="center"><img src="hashword_logo.png" alt="Hashword logo" width="720"></p>
+<p align="center"><img src="hashword_logo.png" alt="Hashword logo" width="560"></p>
 
 <h4 align="center">A Wallet & Password Manager for your computer</h4>
 
