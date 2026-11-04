@@ -79,7 +79,16 @@ delivery are not configured in the app.
 ## Troubleshooting 503 responses
 
 The route returns a generic 503 if authentication initialization or request
-handling throws. Check that:
+handling throws. In Vercel, open the failed request in **Logs** and look for
+`[auth] Request failed`. The server logs a fixed diagnostic code and description,
+without raw exception messages, credentials, SQL, or account data. For example,
+`AUTH_SECRET_INVALID` identifies a missing or short secret, `AUTH_HTTPS_REQUIRED`
+identifies an HTTP auth URL in production, `28P01` identifies a rejected database
+password, and `42P01` identifies missing tables. `AUTH_UNEXPECTED_FAILURE` means
+the exception did not match a known diagnostic; it does not establish a cause.
+These diagnostics require deploying the updated code before reproducing the error.
+
+Check that:
 
 1. All three settings are present in `web/.env.local` and the secret is long enough.
 2. The connection string points to the intended Neon database and is reachable.

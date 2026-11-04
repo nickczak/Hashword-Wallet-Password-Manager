@@ -9,13 +9,24 @@ let auth: ReturnType<typeof createAuth> | undefined;
 
 function createAuth() {
   const { DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL } = process.env;
-  if (!DATABASE_URL || !BETTER_AUTH_SECRET || BETTER_AUTH_SECRET.length < 32 || !BETTER_AUTH_URL) {
-    throw new Error("Set DATABASE_URL, BETTER_AUTH_SECRET, and BETTER_AUTH_URL in web/.env.local.");
+  if (!DATABASE_URL) {
+    throw Object.assign(new Error("Set DATABASE_URL in the server environment."), { code: "AUTH_DATABASE_URL_MISSING" });
   }
-  const url = new URL(BETTER_AUTH_URL);
+  if (!BETTER_AUTH_SECRET || BETTER_AUTH_SECRET.length < 32) {
+    throw Object.assign(new Error("Set BETTER_AUTH_SECRET to at least 32 characters."), { code: "AUTH_SECRET_INVALID" });
+  }
+  if (!BETTER_AUTH_URL) {
+    throw Object.assign(new Error("Set BETTER_AUTH_URL in the server environment."), { code: "AUTH_URL_MISSING" });
+  }
+  let url: URL;
+  try {
+    url = new URL(BETTER_AUTH_URL);
+  } catch {
+    throw Object.assign(new Error("BETTER_AUTH_URL must be an absolute URL."), { code: "AUTH_URL_INVALID" });
+  }
   const local = process.env.NODE_ENV !== "production" && ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
   if (url.protocol !== "https:" && !(local && url.protocol === "http:")) {
-    throw new Error("Use HTTPS outside local development.");
+    throw Object.assign(new Error("Use HTTPS outside local development."), { code: "AUTH_HTTPS_REQUIRED" });
   }
   shared.hashwordDB ??= new Pool({
     connectionString: DATABASE_URL,

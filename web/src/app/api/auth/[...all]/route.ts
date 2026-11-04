@@ -6,6 +6,7 @@
 // Prevent this module from being imported into browser code.
 import "server-only";
 import { getAuth } from "@/server/auth";
+import { authFailureDiagnostic } from "@/server/auth-diagnostics";
 
 async function handle(request: Request) {
   try {
@@ -15,7 +16,8 @@ async function handle(request: Request) {
     // Tell browsers and proxies not to cache authentication responses.
     response.headers.set("Cache-Control", "no-store");
     return response;
-  } catch {
+  } catch (error) {
+    console.error("[auth] Request failed", authFailureDiagnostic(error));
     // Keep internal error details out of the client response.
     // Normal auth failures, like a wrong password, are handled by Better Auth.
     return Response.json(
