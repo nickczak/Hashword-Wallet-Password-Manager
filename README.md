@@ -1,13 +1,15 @@
-![Hashword logo](hashword_logo.png)
+<p align="center"><img src="hashword_logo.png" alt="Hashword logo" width="240"></p>
 
-A Wallet & Password Manager for your computer
+<h4 align="center">A Wallet & Password Manager for your computer</h4>
 
+<p align="center">
 [![Vercel deployment status](https://img.shields.io/website?url=https%3A%2F%2Fhashword.site&label=Vercel%20deployment&logo=vercel)](https://hashword.site)
 [![Website: hashword.site](https://img.shields.io/badge/website-hashword.site-blue)](https://hashword.site)
+</p>
 
 ---
 
-![Earlier Hashword terminal interface demonstration](showcase-desktop.gif)
+<p align="center">![Earlier Hashword terminal interface demonstration](showcase-desktop.gif)
 
 ## Run the website
 
