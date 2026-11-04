@@ -1,8 +1,4 @@
-<div align="center">
-  <img src="hashword_logo.png" alt="Hashword logo" width="400">
-</div>
-
-# Hashword
+![Earlier Hashword terminal interface demonstration](showcase-desktop.gif)
 
 A wallet and password manager in development, with a React/Ink terminal preview
 and a Next.js browser companion.
@@ -19,7 +15,6 @@ and a Next.js browser companion.
 There is no SQLite storage, separate Fastify server, or Supabase integration.
 The vault screen is a placeholder until backend vault storage exists.
 
-![Earlier Hashword terminal interface demonstration](showcase-desktop.gif)
 
 The GIF shows an earlier interface preview with illustrative records, not current
 vault contents.
